@@ -1,72 +1,47 @@
-struct WeatherStation {
-    temperature_c: f64,
-    humidity: f64,
-    wind_speed: f64
+enum DeliveryOption {
+    Letter,
+    Package { weight: f64 },
+    Palette { weight: f64, count: usize },
 }
 
-impl WeatherStation {
-    fn comfort_index(&self) -> f64 {
-        (100.0 - self.humidity) - self.temperature_c - 22.0
-    }
-
-    fn is_stormy(&self) -> bool {
-        self.wind_speed > 80.0
+impl DeliveryOption {
+    fn cost(&self) -> f64 {
+        match self {
+            DeliveryOption::Letter => 2.0,
+            DeliveryOption::Package { weight } => (0.5 * weight) + 2.0,
+            DeliveryOption::Palette { weight, count } => {
+                10.0 + weight * 0.2 + (*count as f64 * 1.5)
+            }
+        }
     }
 }
 
-fn main() {
-    let station = WeatherStation{
-        wind_speed: 2.1231,
-        temperature_c: 2.4523,
-        humidity: 12.453
-    };
-
-    if station.is_stormy() {
-        println!("Stormy");
-    }
-    
-    let index = station.comfort_index();
-    
-    dbg!(index);
-}
+fn main() {}
 
 // --------------------------------------------------------------------------------
-
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    
-    #[test]
-    fn is_stormy_should_return_false() {
-        let mock = WeatherStation {
-            wind_speed: 10.0,
-            temperature_c: 0.0,
-            humidity: 0.0
-        };
 
-        assert!(!mock.is_stormy())
+    #[test]
+    fn delivery_cost_letter_should_return_2() {
+        assert_eq!(DeliveryOption::Letter.cost(), 2.0);
     }
 
     #[test]
-    fn is_stormy_should_return_true() {
-        let mock = WeatherStation {
-            wind_speed: 90.0,
-            temperature_c: 0.0,
-            humidity: 0.0
-        };
-
-        assert!(mock.is_stormy())
+    fn delivery_cost_package_should_return_3() {
+        assert_eq!(DeliveryOption::Package {weight: 2.0}.cost(), 3.0);
     }
 
     #[test]
-    fn comfort_index_should_return_correct_index() {
-        let mock = WeatherStation{
-            wind_speed: 10.0,
-            temperature_c: 20.0,
-            humidity: 10.0
-        };
-
-        assert_eq!(mock.comfort_index(), 48.0);
+    fn delivery_cost_palette_should_return_160_4() {
+        assert_eq!(
+            DeliveryOption::Palette {
+                weight: 2.0,
+                count: 100
+            }.cost(),
+            160.4
+        );
     }
 }
